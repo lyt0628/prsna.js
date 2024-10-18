@@ -1,0 +1,12 @@
+{
+  "name": "@prsna/core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "gulp"
+  },
+  "keywords": ["WebComponent"],
+  "author": "lyt0625",
+  "license": "MIT"
+}
