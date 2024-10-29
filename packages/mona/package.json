@@ -1,0 +1,13 @@
+{
+  "name": "@prsna/mona",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "gulp",
+    "bundle": "gulp bundle"
+  },
+  "keywords": ["WebComponent"],
+  "author": "lyt0628",
+  "license": "MIT"
+}

@@ -1,12 +1,15 @@
 {
   "name": "@prsna/core",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.2",
+  "description": "A easy to use webComponent framework.",
   "main": "dist/main.js",
   "scripts": {
-    "build": "gulp"
+    "build": "gulp",
+    "bundle": "gulp bundle"
   },
-  "keywords": ["WebComponent"],
-  "author": "lyt0625",
+  "keywords": [
+    "WebComponent"
+  ],
+  "author": "lyt0628",
   "license": "MIT"
 }

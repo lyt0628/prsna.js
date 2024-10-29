@@ -9,10 +9,6 @@ const uglify = require('gulp-uglify')
 const babel = require('gulp-babel');
 const rename = require('gulp-rename');
 
-var concat = require('gulp-concat')
-
-const ts = require('gulp-typescript')
-const tsPrj = ts.createProject(path.resolve(__dirname, '../../tsconfig.json'))
 
 function clean(cb){
   del(['dist/*.js'], cb);

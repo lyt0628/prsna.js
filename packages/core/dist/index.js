@@ -1,52 +1,3 @@
-/******************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
-
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-function __metadata(metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-}
-
-typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
-    var e = new Error(message);
-    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
-};
-
-var Template = {
-    render(props) {
-        return `${this.css(props)}
-                ${this.html(props)}`;
-    },
-    html(p) {
-        return ``;
-    },
-    css(p) {
-        return ``;
-    },
-    mapDOM(scope, fn) {
-        return fn(scope);
-    }
-};
-
 function deepCopy(obj) {
     console.log(obj);
     if (typeof obj == 'object' || obj === null) {
@@ -67,10 +18,35 @@ function deepCopy(obj) {
     }
     return newObj;
 }
-var Comm = {
-    deepCopy
-};
-
+function defineGet(target, name, getter) {
+    Object.defineProperty(target, name, {
+        get: getter,
+        enumerable: true,
+        configurable: true,
+    });
+}
+function defineSet(target, name, setter) {
+    Object.defineProperty(target, name, {
+        set: setter,
+        enumerable: true,
+        configurable: true,
+    });
+}
+function hasMethod(obj, name) {
+    return name in obj && typeof obj[name] == 'function';
+}
+function callFuncBefore(cls, name, func) {
+    if (hasMethod(cls.prototype, name)) {
+        const originalMethod = cls.prototype[name];
+        cls.prototype[name] = function (...args) {
+            func(this, args);
+            originalMethod.apply(this, args);
+        };
+    }
+    else {
+        console.error(`Class does have not method ${name}!!!`);
+    }
+}
 function wrapEl(elem, content, cloed = true) {
     let ret = '';
     if (cloed) {
@@ -100,20 +76,73 @@ function syncAttr(el, fields) {
         });
     }
 }
-
 function mpaconcat(arr, fn) {
-    const cloned = Comm.deepCopy(arr);
+    const cloned = deepCopy(arr);
     let ret = '';
     cloned.forEach((item, idx) => {
         ret += fn(item, idx);
     });
     return ret;
 }
+// For getting support of es-string-html plugins
+function html(template, ...rest) {
+    let ret = "";
+    template.forEach((str, idx) => {
+        ret += `${str}${rest[idx] || ""}`;
+    });
+    return ret;
+}
+function css(template, ...rest) {
+    let ret = "";
+    template.forEach((str, idx) => {
+        ret += `${str}${rest[idx] || ""}`;
+    });
+    return ret;
+}
 
-function webComponent(name) {
+function webComponent(name, meta = {}) {
+    meta.name = name;
     return function (target) {
-        if (!customElements.get(name)) {
+        // Sync Properties
+        if (meta.attrs && meta.attrs.length > 0) {
+            defineGet(target, 'observedAttributes', () => meta.attrs);
+            if (meta.attrs) {
+                callFuncBefore(target, 'connectedCallback', (self) => {
+                    if (meta.attrs) { // For Ts Compiler Check
+                        syncAttr(self, meta.attrs);
+                    }
+                });
+            }
+        }
+        // Proxy for meta
+        if (!meta.style)
+            meta.style = '';
+        if (!meta.template)
+            meta.template = '';
+        if (!meta.attrs)
+            meta.attrs = [];
+        if (!meta.mode)
+            meta.mode = 'open';
+        if (!meta.host)
+            meta.host = null;
+        if (!meta.shadowRoot)
+            meta.shadowRoot = null;
+        if (!meta.extend)
+            meta.extend = { extends: lookupExtend(target) };
+        let metaProxy = new Proxy(meta, {
+            set: (target, key, value) => {
+                target[key] = value;
+                updateShadow(target);
+                return true;
+            }
+        });
+        target.prototype.webCompMeta = metaProxy;
+        // Define Component
+        if (!customElements.get(name) && !meta.extend) {
             customElements.define(name, target);
+        }
+        else if (!customElements.get(name) && meta.extend) {
+            customElements.define(name, target, meta.extend);
         }
         else {
             console.error(`CustomElement name :${name} has been defined!!!!`);
@@ -121,71 +150,30 @@ function webComponent(name) {
         return target;
     };
 }
+function lookupExtend(target) {
+    const builtinElMap = new Map();
+    builtinElMap.set(HTMLButtonElement, 'button');
+    for (const [el, name] of builtinElMap) {
+        if (Object.getPrototypeOf(target) === el)
+            return name;
+    }
+}
+function attachShadow(context) {
+    let meta = context.webCompMeta;
+    const shadowRoot = context.attachShadow({
+        mode: meta.mode || "open"
+    });
+    meta.shadowRoot = shadowRoot;
+    meta.host = context;
+    updateShadow(meta);
+}
+function updateShadow(meta) {
+    if (meta.shadowRoot) {
+        meta.shadowRoot.innerHTML = `${meta.style}${meta.template}`;
+    }
+}
+function getWebCompMeta(context) {
+    return context.webCompMeta;
+}
 
-let LYTButtonComponent = class LYTButtonComponent extends HTMLElement {
-    /**
-     *
-     */
-    constructor() {
-        super();
-        this.dom = null;
-        this.text = '';
-        Template.css = function (p) {
-            return ``;
-        };
-        Template.html = function (p) {
-            let h = mpaconcat([1, 2, 3], (item, idx) => {
-                let cont = `Dix: ${idx * item}`;
-                return `${wrapEl('div', cont)}`;
-            });
-            return h;
-        };
-    }
-    connectedCallback() {
-        this.innerHTML = Template.render();
-        this.dom = Template.mapDOM(this, (scope) => {
-            return scope.querySelector('div');
-        });
-        this.text = this.getAttribute('text');
-        syncAttr(this, ['text']);
-        if (this.dom) {
-            this.dom.innerHTML = this.text ? this.text : '';
-        }
-    }
-    static get observedAttributes() {
-        return ['text'];
-    }
-    attributeChangedCallback(name, oldVal, newVal) {
-        if (name == 'text' && this.dom) {
-            this.dom.innerHTML = newVal;
-        }
-    }
-};
-LYTButtonComponent = __decorate([
-    webComponent('lyt-button'),
-    __metadata("design:paramtypes", [])
-], LYTButtonComponent);
-var LYTButtonComponent$1 = LYTButtonComponent;
-// if(! customElements.get('lyt-button')){
-//     customElements.define('lyt-button', LYTButtonComponent)
-// }
-
-let LYTToggleButton = class LYTToggleButton extends HTMLElement {
-    constructor() {
-        super();
-        this.innerHTML = '';
-    }
-    connectedCallback() {
-        this.innerHTML = 'lyt666';
-    }
-};
-LYTToggleButton = __decorate([
-    webComponent('lyt-toggle'),
-    __metadata("design:paramtypes", [])
-], LYTToggleButton);
-
-((function (scope) {
-    scope.LYTButtonComponent = LYTButtonComponent$1;
-    scope.LYTButtonComponent = LYTToggleButton;
-    return scope;
-})({}));
+export { attachShadow, css, deepCopy, defineGet, defineSet, getWebCompMeta, html, mpaconcat, syncAttr, webComponent, wrapEl };

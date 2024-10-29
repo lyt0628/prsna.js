@@ -19,21 +19,20 @@ function clean(cb){
 }
 
 
+
+
 const build = async function() {
   const bundle = await rollup({
     input: ['src/main.ts'],
     external : [
-      '../',
-      '!./'
+      'src/',
     ],
     plugins: [
       rollupTS({
       check: false,
-      tsconfig: path.resolve(__dirname, '../../tsconfig.json'),
-      
-    }),
-
-  ],
+      tsconfig: path.resolve(__dirname, '../../tsconfig.json')
+    })
+  ]
     
   });
 
@@ -53,4 +52,4 @@ function minify(cb){
 }
 
 exports.default = gulp.series(clean, build)
-exports.bundle = gulp.series(clean,  build, minify)
+exports.build = gulp.series(clean,  build, minify)
