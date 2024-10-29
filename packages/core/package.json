@@ -1,6 +1,6 @@
 {
   "name": "@prsna/core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A easy to use webComponent framework.",
   "main": "dist/main.js",
   "scripts": {
