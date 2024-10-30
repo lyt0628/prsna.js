@@ -1,10 +1,6 @@
 
 
-import {webComponent, attachShadow, html, css} from '../../core/src/index';
-
-
-
-
+import {webComponent, attachShadow, html, css} from '@prsna/core';
 
 
 @webComponent('lyt-button', {

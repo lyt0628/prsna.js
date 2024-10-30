@@ -1,7 +1,7 @@
 
 {
     "typescript.tsdk": "node_modules/typescript/lib",
-
+    "typescript.validate.enable": true,
 
     "eslint.validate": ["typescript"],
     "eslint.options": {
