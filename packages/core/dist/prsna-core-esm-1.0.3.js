@@ -176,4 +176,4 @@ function getWebCompMeta(context) {
     return context.webCompMeta;
 }
 
-export { attachShadow, css, deepCopy, defineGet, defineSet, getWebCompMeta, html, mpaconcat, syncAttr, webComponent, wrapEl };
+export { attachShadow, callFuncBefore, css, deepCopy, defineGet, defineSet, getWebCompMeta, hasMethod, html, mpaconcat, syncAttr, webComponent, wrapEl };
