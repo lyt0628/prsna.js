@@ -20,7 +20,6 @@ import { webComponent, html, css, attachShadow} from "../../core/src/index";
         </style>`,
     }
 )
-
 export class LYTLineHElement extends HTMLElement{
     constructor(){
         super();

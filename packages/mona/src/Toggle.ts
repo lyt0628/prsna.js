@@ -1,6 +1,6 @@
 import {webComponent, attachShadow,  getWebCompMeta,
     html, css
-} from '@prsna/core';
+} from '../../core/src/index';
 
 
 @webComponent('lyt-toggle',{
