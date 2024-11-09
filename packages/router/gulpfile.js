@@ -1,52 +1,36 @@
+// Node Mudoles
 const path = require('path')
-const del = require('delete');
 
+
+// Rolup
 const { rollup } = require('rollup');
 const rollupTS = require('rollup-plugin-typescript2')
 
+
+// Gulp
 const gulp = require('gulp');
-const uglify = require('gulp-uglify')
-const babel = require('gulp-babel');
-const rename = require('gulp-rename');
 
 
-function clean(cb){
-  del(['dist/*.js'], cb);
-}
+const util = require('../gulputil');
 
 
-const build = async function() {
-  const bundle = await rollup({
-    input: ['src/main.ts'],
-    external : [
-      '../',
-      '!./'
-    ],
-    plugins: [
-      rollupTS({
-      check: false,
-      tsconfig: path.resolve(__dirname, '../../tsconfig.json'),
-      
-    }),
 
-  ],
-    
-  });
+let packageInfo;
+let esmBundlePath;
 
-  return bundle.write({
-    file: 'dist/index.js',
-    format: 'esm'
-  });
-}
+packageInfo = util.readJson(path.resolve(__dirname, 'package.json'))
+esmBundlePath = path.resolve(__dirname, `dist/prsna-mona-esm-${packageInfo.version}.js`);
 
-function minify(cb){
-    gulp.src('dist/index.js')
-    .pipe(babel())
-    .pipe(uglify())
-    .pipe(rename({extname: '.min.js'}))
-    .pipe(gulp.dest('./dist'));
-    cb()
-}
 
-exports.default = gulp.series(clean, build)
-exports.bundle = gulp.series(clean,  build, minify)
+
+const clean = util.genClean(['dist/*', 'tsconfig.json']);
+const minify = util.genMinify('./dist/**/*.js')
+
+const build = util.genBuildTSAsESM(['src/index.ts'], esmBundlePath)
+
+
+
+
+exports.default = gulp.series(clean, build);
+  
+exports.prod = gulp.series(clean, build, minify);

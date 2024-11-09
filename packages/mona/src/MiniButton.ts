@@ -1,16 +1,15 @@
 
-import { webComponent, html, css, attachShadow} from "../../core/src/index";
+import { webComponent, html, css, initWebComponent, getWebCompMeta} from "../../core/src/index";
 
 
 
 @webComponent(
-    'lyt-minibutton', {
+    'p-minibutton', {
         template: html`
         <slot></slot>
         `,
         style: css`<style>
         :host {
-
             cursor: pointer;
 
             background-color: #00cc66;
@@ -18,17 +17,26 @@ import { webComponent, html, css, attachShadow} from "../../core/src/index";
             padding: 4px 5px;
 
             font-size: 13px;
-            color: #ff0000;
+            color: var(--mona-color-fore-aux2);
 
         }
         </style>`,
-        
+        attrs: ['background-color', 'color']
     }
+
 )
-export class LYTMiniButtonElement extends HTMLElement{
+export class LYTMiniButtonElement extends HTMLButtonElement{
     constructor(){
         super();
-        attachShadow(this)
+        
+        initWebComponent(this);
+        const meta =  getWebCompMeta(this);
+        meta.on('background-color', (oldVal, newVal)=>{
+            this.style.backgroundColor = newVal;
+        })
+        meta.on('color', (oldVal, newVal)=>{
+            this.style.color = newVal
+        })
     }
 
 }

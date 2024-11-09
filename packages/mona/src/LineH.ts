@@ -1,10 +1,10 @@
-import { webComponent, html, css, attachShadow} from "../../core/src/index";
+import { webComponent, html, css, initWebComponent} from "../../core/src/index";
 
 
 
 
 @webComponent(
-    'lyt-lineh', {
+    'p-lineh', {
         template: html`
         <div></div>
         `,
@@ -23,7 +23,7 @@ import { webComponent, html, css, attachShadow} from "../../core/src/index";
 export class LYTLineHElement extends HTMLElement{
     constructor(){
         super();
-        attachShadow(this)
+        initWebComponent(this)
     }
 
 }

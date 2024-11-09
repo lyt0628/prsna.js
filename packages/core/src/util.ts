@@ -2,12 +2,9 @@
 
 export function deepCopy(obj:any){
     console.log(obj);
-    if( typeof obj == 'object' || obj === null){
+    if(typeof obj == 'object' || obj === null){
         return obj;
     }
-
-
-
 
     if(Array.isArray(obj)){
         const clonedArr:Array<any> = [];
@@ -62,7 +59,7 @@ export function callFuncBefore(cls:{prototype:any}, name:string, func:(self:any,
         originalMethod.apply(this, args)
         }
     }else{
-        console.error(`Class does have not method ${name}!!!`);
+        console.error(`[callFuncBefore] Class does have not method ${name}!!!`);
     }
 }
 
@@ -78,29 +75,27 @@ export function wrapEl(elem: string, content: string, cloed = true) {
     return ret;
 }
 
-
+/**
+ * Sync fields with attribute.
+ * @param el WebComponent ctor
+ * @param fields Obervered attributes
+ */
 export function syncAttr(el: HTMLElement, fields: Array<string>) {
 
-
-    for (var field in fields) {
-        Object.defineProperty(el, field, {
-            value: new Proxy(el, {
-                get: function (target, prop) {
-                    if (typeof prop == 'string') {
-                        return target.getAttribute(prop);
-                    }
+    fields.forEach(
+        (field)=>{
+            Object.defineProperty(el, field, {
+                get: function () {
+                        return this.getAttribute(field);
                 },
-                set: function (target, prop, newVal) {
-                    if (typeof prop == 'string') {
-                        target.setAttribute(prop, newVal);
+                set: function (value) {
+                    if(this[field] != value){
+                        this.setAttribute(field, value);
                     }
-                    return newVal;
                 }
-            })
-        });
-
-
-    }
+            });
+        }
+    )
 }
 
 

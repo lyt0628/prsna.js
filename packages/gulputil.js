@@ -27,23 +27,21 @@ function readJson(absPath){
     return JSON.parse(jsonStr);
 }
 
-function genMinify(files){
+function genMinifyJs(glob){
   return function(cb){
-    files.forEach(f => {
-      gulp.src(f)
-      .pipe(babel())
-      .pipe(uglify())
-      .pipe(rename({extname: '.min.js'}))
-      .pipe(gulp.dest('./dist'));
-    });
-  
+    gulp.src(glob)
+    .pipe(babel())
+    .pipe(uglify())
+    .pipe(rename({extname: '.min.js'}))
+    .pipe(gulp.dest('./dist'));
     cb();
   }
-
 }
 
-function genBuildTS(inputs, output, tsConfig){
 
+
+function genBuildTSAsESM(inputs, output){
+  const tsconfg =  path.resolve(__dirname, "../tsconfig.json");
   return async function() {
 
     const bundle = await rollup({
@@ -51,7 +49,7 @@ function genBuildTS(inputs, output, tsConfig){
     plugins: [
       rollupTS({
       check: true,
-      tsconfigPath: tsConfig,
+      tsconfigPath: tsconfg,
     }),
 
   ],
@@ -68,5 +66,5 @@ function genBuildTS(inputs, output, tsConfig){
 
 module.exports.genClean = genClean;
 module.exports.readJson = readJson;
-module.exports.genMinify = genMinify;
-module.exports.genBuildTS = genBuildTS;
+module.exports.genMinify = genMinifyJs;
+module.exports.genBuildTSAsESM = genBuildTSAsESM;

@@ -4,7 +4,7 @@ import {Router} from './Router'
 import {Route} from './Route'
 
 
-import { webComponent, html, css, attachShadow, getWebCompMeta } from '../../core/src/index'
+import { webComponent, html, css, initWebComponent, getWebCompMeta } from '../../core/src/index'
 import { LYTRouterElement } from './RouterComp'
 
 

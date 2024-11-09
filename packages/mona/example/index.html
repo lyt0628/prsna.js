@@ -4,22 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="../dist/prsna-mona-esm-0.0.2.js" type="module"></script>
+    <script src="../dist/prsna-mona-esm-0.0.3.js" type="module"></script>
     <style>
-        a {
-             border-radius: 5px;
-             font-size: 17px;
-             cursor: pointer;
-             margin: 0 auto;
-             
+        :root{
+            /* Color */
+            --mona-color-green: #009933; 
+            --mona-color-green-light: #00FF33;
+            --mona-color-orange: #FF6633;
+            --mona-color-purple: #7833CC;
+            --mona-color-gray: #666666;
+            --mona-color-gray-light: #333333;
+            --mona-color-gray-lighter: #CCCCCC;
+            --mona-color-gray-dark: #333333;
+            --mona-color-gray-darker: #222222;
+            --mona-color-black: #000000;
+            --mona-color-white: #FFFFFF;
+            
+
+            --mona-color-fore-main: var(--mona-color-gray-lighter);
+            --mona-color-fore-aux: var( --mona-color-gray);
+            --mona-color-fore-aux1: var(--mona-color-green);
+            --mona-color-fore-aux2: var(--mona-color-orange);
+            --mona-color-fore-aux3: var( --mona-color-purple);
+
+            --mona-color-back-main: var(--mona-color-gray-dark);
+            --mona-color-back-aux: var(--mona-color-gray-light);
+
         }
+
+        body{
+            background-color: var(--mona-color-back-main);
+            
+        }
+        .a{
+            background-color: red;
+          
+        }
+        .b{
+            background-color: green;
+        }
+        .c{
+            background-color: blue;
+        }
+        .d{
+            background-color: pink;
+            
+        }
+ 
     </style>
 </head>
 <body>
-    <lyt-button >666</lyt-button>
-    <lyt-toggle></lyt-toggle>
-    <lyt-minibutton>Ruby</lyt-minibutton>
-    <lyt-lineh></lyt-lineh>
-    <lyt-linev></lyt-linev>
+    <p-toggle content-selector="p-hbox">
+        <span slot="content">Man</span>
+    </p-toggle>
+
+    <!-- <p-lineh></p-lineh> -->
+    <p-hbox>
+        <p-boxitem class="a">
+            <div style="text-align: center;">AAA</div>
+        </p-boxitem>
+        <p-boxitem class="b" >
+            666
+        </p-boxitem>
+        <p-vbox>
+            <p-boxitem class="c">    
+                <p-minibutton >Ruby</p-minibutton>
+            </p-boxitem>
+            <p-boxitem class="d">
+                <button >
+                    FFF
+                </button>
+            </p-boxitem>    
+        </p-vbox>
+
+        <p-boxitem>
+            VVV
+        </p-boxitem>
+    </p-hbox>
+
+    <p-tabview>
+
+    </p-tabview>
+
+    <p-twoend>
+        <span slot="left">LLL</span>
+        <span slot="right">RRR</span>
+    </p-twoend>
 </body>
 </html>

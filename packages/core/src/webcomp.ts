@@ -1,93 +1,69 @@
-import { callFuncBefore, defineGet } from "./util";
+import { callFuncBefore, deepCopy, defineGet, hasMethod } from "./util";
 import { syncAttr } from "./util";
+import { WebCompMeta, WebCompMetaImpl, WebCompMetaOption } from "./meta";
 
 
 
-// export function addStaticMethod(name : string, func: Function){
-//     return function(target: any){
-//         target[name] = func;
-//     }
-// }
+export function webComponent(name:string,  metaOpt:WebCompMetaOption = {}){
 
-// export function addSuperClass<T extends { new(...args:any[]):{} }>(superClass: T){ // extens with a obj, that is a class
-//     return function <U extends {new(...args:any[]): {}}>(targetClass: U){ 
-//         return class extends superClass{
-//             constructor(...args:any[]){
-//                 super(...args); // Call parent ctor
-//                 return new targetClass(...args); // and capp subclass ctor
-//             }
-//         }
-//     }
-// }
-
-
-
-interface WebCompMeta {
-    [key: string]:any, // string index, and can use target[<string key>]
-    mode?: ShadowRootMode,
-    name?: string,
-    style?: string,
-    template?: string,
-    attrs?: Array<string>,
-    shadowRoot?: ShadowRoot | null,
-    host?: HTMLElement & {webCompMeta:WebCompMeta} | null,
-    extend?: ElementDefinitionOptions | null,
-}
-
-interface WebCompMeta_tag {
-    [key: string]:any, // string index, and can use target[<string key>]
-    style: string,
-    template: string,
-}
-
-export function webComponent(name:string,  meta:WebCompMeta = {}){
-    meta.name = name;
-    
 
     return function<T extends CustomElementConstructor>(target: T){
+        let metaImplObj = new WebCompMetaImpl;
+        metaImplObj.name = name;
+        if(metaOpt.style !== undefined) metaImplObj.style = metaOpt.style;
+        if(metaOpt.template !== undefined) metaImplObj.template = metaOpt.template;
+        if(metaOpt.attrs != undefined) metaImplObj.attrs = metaOpt.attrs;
+        if(metaOpt.mode != undefined) metaImplObj.mode = metaOpt.mode;
+        if(metaOpt.extend === undefined) {
+            metaImplObj.extend = {extends: lookupExtend(target)};
+        }else {
+            metaImplObj.extend = metaOpt.extend;
+        }
+        
 
-        // Sync Properties
-        if(meta.attrs && meta.attrs.length > 0){
-            
-            defineGet(target, 'observedAttributes', ()=>meta.attrs);
+        // Sync fields with attributes
+        if(metaImplObj.attrs.length > 0){
+      
+            defineGet(target, 'observedAttributes', ()=>metaImplObj.attrs);
+    
+            // Declare connectedCallback function if not exists
+            if(!hasMethod(target.prototype, 'connectedCallback')){
+                target.prototype.connectedCallback = ()=>{};
+            }
+            callFuncBefore(target, 'connectedCallback', (self)=>{
+                if(metaOpt.attrs){ // For Ts Compiler Check
+                    syncAttr(self, metaOpt.attrs)
+                }
+            })
 
-            if(meta.attrs){
-                callFuncBefore(target, 'connectedCallback', (self)=>{
-                   if(meta.attrs){ // For Ts Compiler Check
-                    syncAttr(self, meta.attrs)
-                   }
-                })
+            // Dispatch attribute Changed Callback
+            if(!target.prototype.attributeChangedCallback){
+                target.prototype.attributeChangedCallback = function(name:string, oldVal:string, newVal:string){
+                    (this as HTMLElement & {webCompMeta: WebCompMetaImpl})
+                        .webCompMeta.dispatch(name, oldVal, newVal);
+                }
             }
 
         }   
-        // Proxy for meta
-        if(!meta.style) meta.style = '';
-        if(!meta.template) meta.template = '';
-        if (!meta.attrs) meta.attrs = [];
-        if(!meta.mode) meta.mode = 'open';
-        if(!meta.host) meta.host = null;
-        if(!meta.shadowRoot) meta.shadowRoot = null;
-        if(!meta.extend) meta.extend = {extends: lookupExtend(target)};
-        
-        
-        let metaProxy = new Proxy(meta, {
-            set: (target: WebCompMeta_tag, key:string, value:any)=>{       
-                    target[key] = value;
-                    updateShadow(target);
+
+        target.prototype.webCompMeta =  new Proxy(metaImplObj, {
+            set: (metaObj, key:string, value:any)=>{       
+                    metaObj[key] = value;
+                    updateShadow(metaObj);
                      return true;
             }
-        })
-        target.prototype.webCompMeta = metaProxy;
-        
+        });
+
 
         // Define Component
-        if(!customElements.get(name) && !meta.extend){
+        if(!customElements.get(name) && !metaImplObj.extend){
             customElements.define(name, target);
-        } else if(!customElements.get(name) && meta.extend){
-            customElements.define(name, target, meta.extend);
+        } else if(!customElements.get(name) && metaImplObj.extend){
+            customElements.define(name, target, metaImplObj.extend);
         } else{
-            console.error(`CustomElement name :${name} has been defined!!!!`);
+            console.error(`[webComponent] CustomElement name :${name} has been defined!!!!`);
         }
+
         return target;
     }
 
@@ -104,28 +80,36 @@ function lookupExtend<T extends CustomElementConstructor>(target: T): string | u
 
 }
 
-export function attachShadow(context:HTMLElement){
+export function initWebComponent(context:HTMLElement, attachShadow = true){
+    let protoMeta = Object.getPrototypeOf(context).webCompMeta as WebCompMetaImpl;
 
-    let meta = (context as HTMLElement & {webCompMeta: WebCompMeta}).webCompMeta
-
-    const shadowRoot = context.attachShadow({
-        mode: meta.mode || "open"
+    Object.defineProperty(context, 'webCompMeta',{
+        value: protoMeta.copy(),
     });
 
-    meta.shadowRoot = shadowRoot
-    meta.host = context as HTMLElement & {webCompMeta:WebCompMeta};
+    let meta = (context as HTMLElement & {webCompMeta: WebCompMetaOption}).webCompMeta;
 
-    updateShadow(meta);
+    meta.host = context;
+    if(attachShadow){
+        const shadowRoot = context.attachShadow({
+            mode: meta.mode || "open"
+        });
+        meta.shadowRoot = shadowRoot;
+        updateShadow(meta);
+    }
+
+    // let webCompContext = context  as HTMLElement & {webCompMeta:WebCompMetaOption};
+    
+    // webCompContext.webCompMeta = deepCopy(webCompContext);
 }
 
 
-function updateShadow(meta:WebCompMeta){
-
+function updateShadow(meta:WebCompMetaOption){
     if(meta.shadowRoot){
         meta.shadowRoot.innerHTML = `${meta.style}${meta.template}`
     }
 }
 
 export function getWebCompMeta(context:HTMLElement){
-    return (context as HTMLElement & {webCompMeta: WebCompMeta_tag}).webCompMeta;
+    return (context as HTMLElement & {webCompMeta: WebCompMeta}).webCompMeta;
 }

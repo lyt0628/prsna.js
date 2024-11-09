@@ -28,4 +28,6 @@ export class LYTRouterElement extends HTMLElement{
 
         this.router = new Router(rootId, routeArray);
     }
+
+
 }
