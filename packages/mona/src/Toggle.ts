@@ -1,6 +1,6 @@
 import {webComponent, initWebComponent,  getWebCompMeta,
     html, css
-} from '../../core/src/index';
+} from "@prsna/core";
 
 
 @webComponent('p-toggle',{

@@ -1,4 +1,4 @@
-import { webComponent, html, css, initWebComponent, getWebCompMeta} from "../../core/src/index";
+import { webComponent, html, css, initWebComponent, getWebCompMeta} from "@prsna/core";
 
 import {CSS_RESET_BOX} from './reset'
 
@@ -13,7 +13,6 @@ import {CSS_RESET_BOX} from './reset'
             flex-grow: 1;
             flex-shrink: 1;
         }
-
 
         :host {
             ${CSS_RESET_BOX}

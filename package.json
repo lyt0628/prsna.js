@@ -1,16 +1,24 @@
 {
-  "name": "prsna.js",
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "name": "prsna",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
+    "lint": "eslint --cache .",
+    "build": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=18.12.0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "link-workspace-packages": "true",
   "devDependencies": {
+    "@rollup/plugin-alias": "^5.1.1",
+    "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "del": "^8.0.0",
     "delete": "^1.1.0",

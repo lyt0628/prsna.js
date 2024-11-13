@@ -3,10 +3,17 @@ import { webComponent, html, css, initWebComponent, getWebCompMeta} from "@prsna
 import {CSS_RESET_BOX} from './reset'
 
 @webComponent(
-    'p-twoend', {
+    'p-header', {
         template: html`
-        <slot name='left'></slot>
-        <slot name='right'></slot>
+        <p-twoend>
+            <p-vbox slot='left'>
+                <slot name='logo'>
+                    
+                <slot name='searchBox'>
+            </p-vbox>
+
+            <p-vbox slot='right'></p-vbox>
+        </p-twoend>
         `,
         style: css`<style>
         :host {
@@ -26,7 +33,7 @@ import {CSS_RESET_BOX} from './reset'
         attrs: ['wight'],  
     }
 )
-export class PrsnaTwoEndElement extends HTMLElement{
+export class PrsnaHeaderElement extends HTMLElement{
     constructor(){
         super();
         initWebComponent(this);

@@ -1,6 +1,6 @@
 import {webComponent, initWebComponent,  getWebCompMeta,
     html, css
-} from '../../core/src/index';
+} from "@prsna/core";
 
 type TabViewDirection = 'horizontal' | 'vertical';
 
@@ -18,9 +18,7 @@ export class PrsnaTabViewElement extends HTMLElement{
         const dirAttr = this.getAttribute('direction') as TabViewDirection;
         if(dirAttr) this.direction = dirAttr;
 
-        
+
     }
-
-
     
 }

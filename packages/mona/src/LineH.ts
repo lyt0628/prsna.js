@@ -1,4 +1,4 @@
-import { webComponent, html, css, initWebComponent} from "../../core/src/index";
+import { webComponent, html, css, initWebComponent} from "@prsna/core";
 
 
 

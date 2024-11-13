@@ -1,6 +1,5 @@
 packages:
-  - 'packages/**'
-  - 'scripts/**'
+  - 'packages/*'
   - '! **/test/**'
   - '! **/tests/**'
   - '! **/dist/**'
